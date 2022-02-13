@@ -4,11 +4,22 @@ import (
 	"fmt"
 	"github.com/Jitsusama/Golf/pkg/cli"
 	"os"
+	"strings"
 )
 
 func main() {
-	if err := cli.NewCli(os.Stdout).Run(); err != nil {
+	env := parseEnvironment(os.Environ())
+	if err := cli.NewCli(env, os.Stdout).Run(); err != nil {
 		fmt.Printf("golf failed to run: %v\n", err)
 		os.Exit(1)
 	}
+}
+
+func parseEnvironment(env []string) map[string]string {
+	result := make(map[string]string)
+	for _, e := range env {
+		parts := strings.SplitN(e, "=", 2)
+		result[parts[0]] = parts[1]
+	}
+	return result
 }

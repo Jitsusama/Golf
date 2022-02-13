@@ -6,14 +6,16 @@ import (
 )
 
 type Cli struct {
+	env    map[string]string
 	stdout io.Writer
 }
 
-func NewCli(stdout io.Writer) *Cli {
-	return &Cli{stdout: stdout}
+func NewCli(env map[string]string, stdout io.Writer) *Cli {
+	return &Cli{env: env, stdout: stdout}
 }
 
 func (c *Cli) Run() error {
-	_, err := fmt.Fprintln(c.stdout, "hello")
+	message := fmt.Sprintf("hello %s", c.env["NAME"])
+	_, err := fmt.Fprintln(c.stdout, message)
 	return err
 }
