@@ -17,9 +17,9 @@ func TestSaysHello(t *testing.T) {
 	cmd.Stderr = stderr
 
 	if err := cmd.Run(); err != nil {
-		t.Fatalf("failed to run golf: %s", stderr.String())
+		t.Fatalf("failed to run cli: %s", stderr.String())
 	}
-	if stdout.String() != "hello" {
+	if stdout.String() != "hello\n" {
 		t.Errorf("stdout: got %q want %q", stdout.String(), "hello")
 	}
 }
