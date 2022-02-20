@@ -7,22 +7,30 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
+	"regexp"
 	"testing"
 )
 
 func TestReportsOnOneHoleOnePersonGame(t *testing.T) {
+	stdout := &bytes.Buffer{}
+
 	adapter, cleanup := startAdapter(t)
 	defer cleanup()
 	gateway, cleanup := startGateway(t, adapter)
 	defer cleanup()
 
-	runGolf(t, gateway, "begin")
-	runGolf(t, gateway, "round", "5")
-	stdout := runGolf(t, gateway, "end")
+	runGolf(t, gateway, stdout, "begin")
+	runGolf(t, gateway, stdout, "round", "5")
+	runGolf(t, gateway, stdout, "end")
 
-	if !strings.Contains(stdout, "5 points") {
-		t.Errorf("%q does not contain 5 points", stdout)
+	if matches, err := regexp.Match(
+		"/game started.*5 strokes for hole.*5 strokes for game/im",
+		stdout.Bytes(),
+	); err != nil || !matches {
+		t.Errorf(
+			"%q lacks either the game's start, hole score or game score",
+			stdout,
+		)
 	}
 }
 
@@ -70,10 +78,9 @@ func startGateway(t *testing.T, adapter string) (string, func()) {
 	}
 }
 
-func runGolf(t *testing.T, gateway string, args ...string) string {
+func runGolf(t *testing.T, gateway string, stdout *bytes.Buffer, args ...string) {
 	t.Helper()
 
-	stdout := &bytes.Buffer{}
 	path := filepath.Join("..", "cmd", "golf", "main.go")
 	args = append([]string{"run", path}, args...)
 
@@ -85,6 +92,4 @@ func runGolf(t *testing.T, gateway string, args ...string) string {
 	if err := cmd.Run(); err != nil {
 		t.Fatalf("failed to run golf: %v", err)
 	}
-
-	return stdout.String()
 }
