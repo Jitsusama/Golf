@@ -2,9 +2,7 @@ package cli_test
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/Jitsusama/Golf/pkg/cli"
-	"strings"
 	"testing"
 )
 
@@ -12,47 +10,25 @@ func TestBeginsAGame(t *testing.T) {
 	var env []string
 	stdout := &bytes.Buffer{}
 	args := []string{"golf", "begin"}
+	game := &mockGame{}
 
-	golf := cli.NewCli(env, args, stdout)
+	golf := cli.NewCli(env, args, stdout, game)
 	if err := golf.Run(); err != nil {
 		t.Fatalf("cli failed to run: %v", err)
 	}
 
-	if !strings.Contains(stdout.String(), "game started") {
-		t.Errorf("%q does not contain %q", stdout.String(), "game started`")
+	if game.beginCount != 1 {
+		t.Errorf("g begin: got %d want %d", game.beginCount, 1)
 	}
 }
 
-// TODO: handle game already in progress on start
+// TODO: handle g already in progress on start
 
-func TestPrintsHello(t *testing.T) {
-	stdout := &bytes.Buffer{}
-
-	if err := cli.NewCli(nil, nil, stdout).Run(); err != nil {
-		t.Fatalf("cli failed to run: %v", err)
-	}
-
-	if !strings.Contains(stdout.String(), "hello") {
-		t.Errorf("%q does not contain %q", stdout.String(), "hello")
-	}
+type mockGame struct {
+	beginCount int
 }
 
-func TestPrintsName(t *testing.T) {
-	for _, name := range []string{
-		"Joel",
-		"Gailyn",
-	} {
-		t.Run(fmt.Sprintf("prints %s", name), func(t *testing.T) {
-			stdout := &bytes.Buffer{}
-			env := []string{fmt.Sprintf("NAME=%s", name)}
-
-			if err := cli.NewCli(env, nil, stdout).Run(); err != nil {
-				t.Fatalf("cli failed to run: %v", err)
-			}
-
-			if !strings.Contains(stdout.String(), name) {
-				t.Errorf("%q does not contain %q", stdout.String(), name)
-			}
-		})
-	}
+func (g *mockGame) Begin() error {
+	g.beginCount++
+	return nil
 }
