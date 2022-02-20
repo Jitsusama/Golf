@@ -9,9 +9,11 @@ import (
 )
 
 func TestBeginsAGame(t *testing.T) {
+	var env []string
 	stdout := &bytes.Buffer{}
+	args := []string{"golf", "begin"}
 
-	golf := cli.NewCli(nil, []string{"golf", "begin"}, stdout)
+	golf := cli.NewCli(env, args, stdout)
 	if err := golf.Run(); err != nil {
 		t.Fatalf("cli failed to run: %v", err)
 	}
@@ -20,6 +22,8 @@ func TestBeginsAGame(t *testing.T) {
 		t.Errorf("%q does not contain %q", stdout.String(), "game started`")
 	}
 }
+
+// TODO: handle game already in progress on start
 
 func TestPrintsHello(t *testing.T) {
 	stdout := &bytes.Buffer{}
@@ -40,7 +44,7 @@ func TestPrintsName(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("prints %s", name), func(t *testing.T) {
 			stdout := &bytes.Buffer{}
-			env := map[string]string{"NAME": name}
+			env := []string{fmt.Sprintf("NAME=%s", name)}
 
 			if err := cli.NewCli(env, nil, stdout).Run(); err != nil {
 				t.Fatalf("cli failed to run: %v", err)
