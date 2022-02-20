@@ -9,7 +9,9 @@ import (
 
 func main() {
 	env := parseEnvironment(os.Environ())
-	if err := cli.NewCli(env, os.Stdout).Run(); err != nil {
+	golf := cli.NewCli(env, os.Args, os.Stdout)
+
+	if err := golf.Run(); err != nil {
 		fmt.Printf("golf failed to run: %v\n", err)
 		os.Exit(1)
 	}
